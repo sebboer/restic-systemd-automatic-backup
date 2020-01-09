@@ -54,7 +54,6 @@ wait $!
 # --one-file-system makes sure we only backup exactly those mounted file systems specified in $BACKUP_PATHS, and thus not directories like /dev, /sys etc.
 # --tag lets us reference these backups later when doing restic-forget.
 restic backup \
-	--verbose \
 	--one-file-system \
 	--tag $BACKUP_TAG \
 	$BACKUP_EXCLUDES \
@@ -64,7 +63,6 @@ wait $!
 # Dereference and delete/prune old backups.
 # See restic-forget(1) or http://restic.readthedocs.io/en/latest/060_forget.html
 restic forget \
-	--verbose \
 	--tag $BACKUP_TAG \
 	--prune \
 	--group-by "paths,tags" \
