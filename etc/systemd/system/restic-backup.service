@@ -1,5 +1,5 @@
 [Unit]
-Description=Backup with restic to Backblaze B2
+Description=Backup with restic to AWS S3
 OnFailure=status-email-user@%n.service
 Requires=nm-unmetered-connection.service
 

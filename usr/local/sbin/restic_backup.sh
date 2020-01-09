@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Make backup my system with restic to Backblaze B2.
+# Make backup my system with restic to AWS S3.
 # This script is typically run by: /etc/systemd/system/restic-backup.{service,timer}
 
 # Exit on failure, pipe failure
@@ -37,11 +37,8 @@ BACKUP_TAG=systemd.timer
 
 
 # Set all environment variables like
-# B2_ACCOUNT_ID, B2_ACCOUNT_KEY, RESTIC_REPOSITORY etc.
-source /etc/restic/b2_env.sh
-
-# How many network connections to set up to B2. Default is 5.
-B2_CONNECTIONS=50
+# AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, RESTIC_REPOSITORY etc.
+source /etc/restic/env.sh
 
 # NOTE start all commands in background and wait for them to finish.
 # Reason: bash ignores any signals while child process is executing and thus my trap exit hook is not triggered.
@@ -60,19 +57,16 @@ restic backup \
 	--verbose \
 	--one-file-system \
 	--tag $BACKUP_TAG \
-	--option b2.connections=$B2_CONNECTIONS \
 	$BACKUP_EXCLUDES \
 	$BACKUP_PATHS &
 wait $!
 
 # Dereference and delete/prune old backups.
 # See restic-forget(1) or http://restic.readthedocs.io/en/latest/060_forget.html
-# --group-by only the tag and path, and not by hostname. This is because I create a B2 Bucket per host, and if this hostname accidentially change some time, there would now be multiple backup sets.
 restic forget \
 	--verbose \
 	--tag $BACKUP_TAG \
-	--option b2.connections=$B2_CONNECTIONS \
-        --prune \
+	--prune \
 	--group-by "paths,tags" \
 	--keep-daily $RETENTION_DAYS \
 	--keep-weekly $RETENTION_WEEKS \
